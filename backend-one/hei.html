@@ -1,0 +1,836 @@
+	
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	
+<head>
+<title>Tiira</title>
+	
+<link rel="apple-touch-icon" href="https://www.tiira.fi/images/apple-touch-icon.png" />
+<link rel="apple-touch-icon" href="https://www.tiira.fi/images/apple-touch-icon-152x152.png" />
+<link rel="apple-touch-icon" href="https://www.tiira.fi/images/apple-touch-icon-167x167.png" />
+<link rel="apple-touch-icon" href="https://www.tiira.fi/images/apple-touch-icon-180x180.png" />
+<link rel="apple-touch-icon-precomposed" href="https://www.tiira.fi/images/apple-touch-icon-300x300.png" />
+<link rel="icon" href="https://www.tiira.fi/images/icon-hires.png" />
+<link rel="icon" href="https://www.tiira.fi/images/icon-normal.png" />
+<link rel="shortcut icon" href="https://www.tiira.fi/favicon.ico" />
+
+<link rel="stylesheet" type="text/css" href="screen-basic.css"/>
+	
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<meta http-equiv="Content-Script-Type" content="text/javascript"/>
+<meta http-equiv="Content-Style-Type" content="text/css"/>
+
+</head>
+
+	<body onload="focus_tunnus()">
+	<script 
+	language="JavaScript" type="text/javascript" src="/tallenteet/javascr_tallenne.js"> 
+</script>
+<script 
+	language="JavaScript" type="text/javascript" src="/ajax/ajax_funktiot.js"> 
+</script>
+<script language="JavaScript" type="text/javascript" src="javascr.js"></script>
+<script type="text/javascript">
+<!--
+function yhteystiedot(ilmoitus) {
+        var answer = confirm(ilmoitus);
+        if (answer){
+                window.location = "index.php?toiminto=4";
+        }	
+}
+
+function focus_tunnus() { /* 20100512 AJL */
+   document.login.tunnus.focus()
+}
+-->
+</script>		
+<div id="header">
+<a target="_blank" href="http://www.birdlife.fi" title="BirdLife Suomi etusivu"><img src="header.jpg" border="0" alt="etusivu"/></a>
+</div>	
+<div id="user">
+    <ul>
+    <li id="user-info">
+    <form method="post" action="index.php?toiminto" name="login">
+    <input type="hidden" name="kirjaudutaan" value="2" />
+    Tunnus:<input type="text" name="tunnus" class="textfield" title="tunnus"/>&nbsp;
+    Salasana<input type="password" name="salasana" class="textfield" title="salasana"/>&nbsp;<input type="submit" name="login" value="KIRJAUDU" class="loginbutton"/>
+    </form>
+    </li>
+    <li id="user-logout"><a href="index.php?toiminto=2">Rekisteröidy</a></li>
+    <li id="user-time">1.10.2021 19:40:58</li>
+    </ul>
+    </div>
+<div id="main"><div id="content"><script language="JavaScript" type="text/javascript" src="ajax/ajax_funktiot.js">
+ </script>
+<script type="text/javascript">
+<!--
+function rekurs_rari() { /* laittaa rastin myös suomi-kohtaan kun alue rastitetaan */
+	document.getElementById("firari").checked='checked'
+}
+function rekurs_aika() {
+	document.getElementById("fiaika").checked='checked'
+}
+function rekurs_maara() {
+	document.getElementById("fimaara").checked='checked'
+}
+function maara_poisto() {
+	if (document.getElementById("fimaara").checked==false) {
+		document.getElementById("almaara").checked=false
+	}
+}
+function aika_poisto() {
+	if (document.getElementById("fiaika").checked==false) {
+		document.getElementById("alaika").checked=false
+	}
+}
+
+function rari_poisto() { /*kun rastittaa suomi-kohdan pois niin ottaa rastin pois alueesta ja piilottaa alueen. Jos klikkaa fi-rari päälle niin al-rari näytetään tyhjänä*/
+	if (document.getElementById("firari").checked==false) {
+		document.getElementById("alrari").checked=false;
+	}
+}
+
+/*  PIILOTTAA KERUTOIMRADIO*/
+function kerutoimpiilo() {
+	v=document.getElementById("aluevalikko").value;
+        if (v==2 || v==3 || v==4 || v==10 || v==11 || v==13) { // näytetään kerutoim TLY, Tringa, Porvoo, PiLY, PLY, MLY
+	        document.getElementById("kerutoim1").style.display='block'
+                document.getElementById("kerutoim2").style.display='block'
+        } else { // piilotetaan
+                document.getElementById("kerutoim1").style.display='none'
+                document.getElementById("kerutoim2").style.display='none'
+		document.paaformi_name.kerutoim[0].checked=true;	// laitetaan alue keruuksi aina kun kyseessä alue jolla ei toimialuetta
+        }
+}
+/* document.paaformi_name.kerutoim[1].value="1"; tämä vaihtaa keruuksi */
+
+function ohje(otsikko,teksti) {
+	if (teksti == '') {
+		otsikko = 'Ohje';
+		teksti = 'Anna hakukriteerit ja paina \'Hae\'';
+	}
+	ohjeteksti = '<i>'+otsikko+'</i><br/><br/>'+teksti;
+	document.getElementById("help").innerHTML=ohjeteksti;
+	return;
+}
+
+function focus_laji() {
+      	document.getElementById("paaformi").laji.focus();
+}
+
+function dis_ena_negahaku(arvo) {
+	/**	20131206 AJL Jos lajikentässä on jotakin, näytetään negahakun kruxi-kenttä
+	*	20160116 AJL Jos ollaan peruslomakkeella, negahaku-kentää ei ole, ohitetaan.
+	*/
+	var piilo = '';
+
+	if (typeof arvo.value == 'undefined' || arvo == null) {		
+		piilo = '';
+	} else {		
+		piilo = arvo.value;
+	}
+
+	// 20160127 AJL
+	var loytyyko = document.getElementById("negahakubox");
+	if (loytyyko == null) {
+		; // ei ollut, ohitetaan
+	} else {
+		if (piilo=='') {
+			document.getElementById("negahakubox").style.display = "none";
+		} else {
+			/* document.getElementById("negahakubox").style.display = "block"; */
+			document.getElementById("negahakubox").style.display = "";
+		}
+	}
+}
+
+-->
+</script>
+	
+				    
+<div id="isokehys">
+Haku: <b>Eilisen ja tämän päivän mielenkiintoiset</b>	
+	
+	
+	
+	
+	
+	
+	
+	
+<div style="float: left; padding: 10px 10px 10px 10px">
+</div>
+<div style="float:left; padding:10px 10px 10px 10px"><a href="?toiminto=21&amp;id=3613&amp;sivu=1" onmouseover="javascript: ohje('Seuraava','Siirry seuraavalle sivulle.')">Seuraava &raquo;</a></div>
+
+<div style="clear:left">
+<table class="havaintolistaus">
+<tr class="kapit"><td></td><td></td><td></td><td>
+Laji</td><td>
+Päivämäärä</td><td>
+Kunta</td><td>Paikka</td><td>Määrä
+</td><td>Lisätietoja</td><td>Havainnoijat</td><td></td><td></td></tr>
+        <tr class="tumma">    <td>    </td>
+	<!-- 20100427 AJL -->
+	<td>
+			</td>
+	<!-- 20111221 AJL -->
+	<td>
+			</td>
+	
+	<td>
+    	<a class="havlista" href="javascript:naytahavis('24497472')" title="Näytä havainnon tiedot">
+	Laulujoutsen	</a>    </td>
+    <!-- päivämäärä -->
+    <td> 
+    30.9.2021    </td>
+
+    <!-- KUNTA -->
+    <td>Kemijärvi</td>
+
+    <!-- PAIKKA -->
+    <td>    <!-- LUKUMÄÄRÄ -->
+    <td>805</td>
+
+    <!-- LISÄTIEDOT -->
+    <td>
+     p 510 N- ja 295 S-puolel...    </td><td>Pirkka Aalto    </td>    </tr>	<tr class="vaalea">    <td>    </td>
+	<!-- 20100427 AJL -->
+	<td>
+			</td>
+	<!-- 20111221 AJL -->
+	<td>
+			</td>
+	
+	<td>
+    	<a class="havlista" href="javascript:naytahavis('24498251')" title="Näytä havainnon tiedot">
+	Laulujoutsen	</a>    </td>
+    <!-- päivämäärä -->
+    <td> 
+    30.9.2021    </td>
+
+    <!-- KUNTA -->
+    <td>Vaasa</td>
+
+    <!-- PAIKKA -->
+    <td>    <!-- LUKUMÄÄRÄ -->
+    <td>934</td>
+
+    <!-- LISÄTIEDOT -->
+    <td>
+    918 ad p, 16 1kv p     </td><td>Matti Maskulin    </td>    </tr>        <tr class="tumma">    <td>    </td>
+	<!-- 20100427 AJL -->
+	<td>
+			</td>
+	<!-- 20111221 AJL -->
+	<td>
+			</td>
+	
+	<td>
+    	<a class="havlista" href="javascript:naytahavis('24501013')" title="Näytä havainnon tiedot">
+	Metsähanhi	</a>    </td>
+    <!-- päivämäärä -->
+    <td> 
+    1.10.2021    </td>
+
+    <!-- KUNTA -->
+    <td>Lumijoki</td>
+
+    <!-- PAIKKA -->
+    <td>    <!-- LUKUMÄÄRÄ -->
+    <td>2000</td>
+
+    <!-- LISÄTIEDOT -->
+    <td>
+     p Mantereella S    </td><td>Kalle Hiekkanen    </td>    </tr>	<tr class="vaalea">    <td>    </td>
+	<!-- 20100427 AJL -->
+	<td>
+			</td>
+	<!-- 20111221 AJL -->
+	<td>
+			</td>
+	
+	<td>
+    	<a class="havlista" href="javascript:naytahavis('24496297')" title="Näytä havainnon tiedot">
+	Metsähanhi	</a>    </td>
+    <!-- päivämäärä -->
+    <td> 
+    30.9.2021    </td>
+
+    <!-- KUNTA -->
+    <td>Huittinen</td>
+
+    <!-- PAIKKA -->
+    <td>    <!-- LUKUMÄÄRÄ -->
+    <td>6500</td>
+
+    <!-- LISÄTIEDOT -->
+    <td>
+    3500 nous S, 3000 nous N ...    </td><td>Jouko Metsälä    </td>    </tr>        <tr class="tumma">    <td>    </td>
+	<!-- 20100427 AJL -->
+	<td>
+			</td>
+	<!-- 20111221 AJL -->
+	<td>
+			</td>
+	
+	<td>
+    	<a class="havlista" href="javascript:naytahavis('24498263')" title="Näytä havainnon tiedot">
+	Metsähanhi	</a>    </td>
+    <!-- päivämäärä -->
+    <td> 
+    30.9.2021    </td>
+
+    <!-- KUNTA -->
+    <td>Vaasa</td>
+
+    <!-- PAIKKA -->
+    <td>    <!-- LUKUMÄÄRÄ -->
+    <td>1800</td>
+
+    <!-- LISÄTIEDOT -->
+    <td>
+     kiert     </td><td>Matti Maskulin    </td>    </tr>	<tr class="vaalea">    <td>    </td>
+	<!-- 20100427 AJL -->
+	<td>
+			</td>
+	<!-- 20111221 AJL -->
+	<td>
+			</td>
+	
+	<td>
+    	<a class="havlista" href="javascript:naytahavis('24498256')" title="Näytä havainnon tiedot">
+	Taigametsähanhi	</a>    </td>
+    <!-- päivämäärä -->
+    <td> 
+    30.9.2021    </td>
+
+    <!-- KUNTA -->
+    <td>Vaasa</td>
+
+    <!-- PAIKKA -->
+    <td>    <!-- LUKUMÄÄRÄ -->
+    <td>641</td>
+
+    <!-- LISÄTIEDOT -->
+    <td>
+     p     </td><td>Matti Maskulin    </td>    </tr>        <tr class="tumma">    <td>    </td>
+	<!-- 20100427 AJL -->
+	<td>
+			</td>
+	<!-- 20111221 AJL -->
+	<td>
+			</td>
+	
+	<td>
+    	<a class="havlista" href="javascript:naytahavis('24501009')" title="Näytä havainnon tiedot">
+	Lyhytnokkahanhi	</a>    </td>
+    <!-- päivämäärä -->
+    <td> 
+    1.10.2021    </td>
+
+    <!-- KUNTA -->
+    <td>Lumijoki</td>
+
+    <!-- PAIKKA -->
+    <td>    <!-- LUKUMÄÄRÄ -->
+    <td>30</td>
+
+    <!-- LISÄTIEDOT -->
+    <td>
+     p     </td><td>Kalle Hiekkanen    </td>    </tr>	<tr class="vaalea">    <td>    </td>
+	<!-- 20100427 AJL -->
+	<td>
+			</td>
+	<!-- 20111221 AJL -->
+	<td>
+			</td>
+	
+	<td>
+    	<a class="havlista" href="javascript:naytahavis('24498258')" title="Näytä havainnon tiedot">
+	Lyhytnokkahanhi	</a>    </td>
+    <!-- päivämäärä -->
+    <td> 
+    30.9.2021    </td>
+
+    <!-- KUNTA -->
+    <td>Vaasa</td>
+
+    <!-- PAIKKA -->
+    <td>    <!-- LUKUMÄÄRÄ -->
+    <td>28</td>
+
+    <!-- LISÄTIEDOT -->
+    <td>
+     p     </td><td>Matti Maskulin    </td>    </tr>        <tr class="tumma">    <td>    </td>
+	<!-- 20100427 AJL -->
+	<td>
+			</td>
+	<!-- 20111221 AJL -->
+	<td>
+			</td>
+	
+	<td>
+    	<a class="havlista" href="javascript:naytahavis('24498191')" title="Näytä havainnon tiedot">
+	Merihanhi x kanadanhanhi	</a>    </td>
+    <!-- päivämäärä -->
+    <td> 
+    30.9.2021    </td>
+
+    <!-- KUNTA -->
+    <td>Lieto</td>
+
+    <!-- PAIKKA -->
+    <td>    <!-- LUKUMÄÄRÄ -->
+    <td>3</td>
+
+    <!-- LISÄTIEDOT -->
+    <td>
+     p     </td><td>Hannu Ali-Eskola    </td>    </tr>	<tr class="vaalea">    <td>    </td>
+	<!-- 20100427 AJL -->
+	<td>
+			</td>
+	<!-- 20111221 AJL -->
+	<td>
+			</td>
+	
+	<td>
+    	<a class="havlista" href="javascript:naytahavis('24500283')" title="Näytä havainnon tiedot">
+	Lumihanhi	</a>    </td>
+    <!-- päivämäärä -->
+    <td> 
+    1.10.2021    </td>
+
+    <!-- KUNTA -->
+    <td>Liminka</td>
+
+    <!-- PAIKKA -->
+    <td>    <!-- LUKUMÄÄRÄ -->
+    <td>1</td>
+
+    <!-- LISÄTIEDOT -->
+    <td>
+     p lähti metsähanhien muk...    </td><td>Reijo Kylmänen    </td>    </tr>        <tr class="tumma">    <td>    </td>
+	<!-- 20100427 AJL -->
+	<td>
+			</td>
+	<!-- 20111221 AJL -->
+	<td>
+			</td>
+	
+	<td>
+    	<a class="havlista" href="javascript:naytahavis('24500799')" title="Näytä havainnon tiedot">
+	Lumihanhi	</a>    </td>
+    <!-- päivämäärä -->
+    <td> 
+    1.10.2021    </td>
+
+    <!-- KUNTA -->
+    <td>Tyrnävä</td>
+
+    <!-- PAIKKA -->
+    <td>    <!-- LUKUMÄÄRÄ -->
+    <td>1</td>
+
+    <!-- LISÄTIEDOT -->
+    <td>
+      p     </td><td>Tuomas Väyrynen    </td>    </tr>	<tr class="vaalea">    <td>    </td>
+	<!-- 20100427 AJL -->
+	<td>
+			</td>
+	<!-- 20111221 AJL -->
+	<td>
+			</td>
+	
+	<td>
+    	<a class="havlista" href="javascript:naytahavis('24501219')" title="Näytä havainnon tiedot">
+	Kanadanhanhi	</a>    </td>
+    <!-- päivämäärä -->
+    <td> 
+    1.10.2021    </td>
+
+    <!-- KUNTA -->
+    <td>Lohja</td>
+
+    <!-- PAIKKA -->
+    <td>    <!-- LUKUMÄÄRÄ -->
+    <td>499</td>
+
+    <!-- LISÄTIEDOT -->
+    <td>
+     p     </td><td>Timo Luoto    </td>    </tr>        <tr class="tumma">    <td>    </td>
+	<!-- 20100427 AJL -->
+	<td>
+			</td>
+	<!-- 20111221 AJL -->
+	<td>
+			</td>
+	
+	<td>
+    	<a class="havlista" href="javascript:naytahavis('24499087')" title="Näytä havainnon tiedot">
+	Kanadanhanhi x valkoposkihanhi	</a>    </td>
+    <!-- päivämäärä -->
+    <td> 
+    1.10.2021    </td>
+
+    <!-- KUNTA -->
+    <td>Lapinjärvi</td>
+
+    <!-- PAIKKA -->
+    <td>    <!-- LUKUMÄÄRÄ -->
+    <td>1</td>
+
+    <!-- LISÄTIEDOT -->
+    <td>
+      p     </td><td>Arto Juvonen    </td>    </tr>	<tr class="vaalea">    <td>    </td>
+	<!-- 20100427 AJL -->
+	<td>
+			</td>
+	<!-- 20111221 AJL -->
+	<td>
+			</td>
+	
+	<td>
+    	<a class="havlista" href="javascript:naytahavis('24498900')" title="Näytä havainnon tiedot">
+	Valkoposkihanhi	</a>    </td>
+    <!-- päivämäärä -->
+    <td> 
+    1.10.2021    </td>
+
+    <!-- KUNTA -->
+    <td>Lapinjärvi</td>
+
+    <!-- PAIKKA -->
+    <td>    <!-- LUKUMÄÄRÄ -->
+    <td>98000</td>
+
+    <!-- LISÄTIEDOT -->
+    <td>
+      p Laskettu yöpymästä lä...    </td><td>Arto Juvonen    </td>    </tr>        <tr class="tumma">    <td>    </td>
+	<!-- 20100427 AJL -->
+	<td>
+			</td>
+	<!-- 20111221 AJL -->
+	<td>
+			</td>
+	
+	<td>
+    	<a class="havlista" href="javascript:naytahavis('24499117')" title="Näytä havainnon tiedot">
+	Valkoposkihanhi	</a>    </td>
+    <!-- päivämäärä -->
+    <td> 
+    1.10.2021    </td>
+
+    <!-- KUNTA -->
+    <td>Pyhtää</td>
+
+    <!-- PAIKKA -->
+    <td>    <!-- LUKUMÄÄRÄ -->
+    <td>34000</td>
+
+    <!-- LISÄTIEDOT -->
+    <td>
+     p     </td><td>Ari Vuorio    </td>    </tr>	<tr class="vaalea">    <td>    </td>
+	<!-- 20100427 AJL -->
+	<td>
+			</td>
+	<!-- 20111221 AJL -->
+	<td>
+			</td>
+	
+	<td>
+    	<a class="havlista" href="javascript:naytahavis('24499353')" title="Näytä havainnon tiedot">
+	Valkoposkihanhi	</a>	<font color="#8A8A8A"> (Koonti)</font>     </td>
+    <!-- päivämäärä -->
+    <td> 
+    30.9.2021    </td>
+
+    <!-- KUNTA -->
+    <td>Hollola</td>
+
+    <!-- PAIKKA -->
+    <td>    <!-- LUKUMÄÄRÄ -->
+    <td>35000</td>
+
+    <!-- LISÄTIEDOT -->
+    <td>
+     nn. p kiert lask Enimmil...    </td><td>Jukka Pellinen, Tapani...    </td>    </tr>        <tr class="tumma">    <td>    </td>
+	<!-- 20100427 AJL -->
+	<td>
+			</td>
+	<!-- 20111221 AJL -->
+	<td>
+			</td>
+	
+	<td>
+    	<a class="havlista" href="javascript:naytahavis('24501335')" title="Näytä havainnon tiedot">
+	Punakaulahanhi	</a>	<font color="#8A8A8A"> (Koonti)</font>     </td>
+    <!-- päivämäärä -->
+    <td> 
+    30.9.-1.10.2021    </td>
+
+    <!-- KUNTA -->
+    <td>Imatra</td>
+
+    <!-- PAIKKA -->
+    <td>    <!-- LUKUMÄÄRÄ -->
+    <td>1</td>
+
+    <!-- LISÄTIEDOT -->
+    <td>
+     1kv  p Linnun löytäjä:  ...    </td><td>Petri Bruun, Pekka Jää...    </td>    </tr>	<tr class="vaalea">    <td>    </td>
+	<!-- 20100427 AJL -->
+	<td>
+			</td>
+	<!-- 20111221 AJL -->
+	<td>
+			</td>
+	
+	<td>
+    	<a class="havlista" href="javascript:naytahavis('24499119')" title="Näytä havainnon tiedot">
+	Haapana	</a>    </td>
+    <!-- päivämäärä -->
+    <td> 
+    1.10.2021    </td>
+
+    <!-- KUNTA -->
+    <td>Pyhtää</td>
+
+    <!-- PAIKKA -->
+    <td>    <!-- LUKUMÄÄRÄ -->
+    <td>1800</td>
+
+    <!-- LISÄTIEDOT -->
+    <td>
+     p     </td><td>Ari Vuorio    </td>    </tr>        <tr class="tumma">    <td>    </td>
+	<!-- 20100427 AJL -->
+	<td>
+			</td>
+	<!-- 20111221 AJL -->
+	<td>
+			</td>
+	
+	<td>
+    	<a class="havlista" href="javascript:naytahavis('24501740')" title="Näytä havainnon tiedot">
+	Haapana	</a>    </td>
+    <!-- päivämäärä -->
+    <td> 
+    1.10.2021    </td>
+
+    <!-- KUNTA -->
+    <td>Kuusamo</td>
+
+    <!-- PAIKKA -->
+    <td>    <!-- LUKUMÄÄRÄ -->
+    <td>1000</td>
+
+    <!-- LISÄTIEDOT -->
+    <td>
+     p     </td><td>Roland Vösa    </td>    </tr>	<tr class="vaalea">    <td>    </td>
+	<!-- 20100427 AJL -->
+	<td>
+			</td>
+	<!-- 20111221 AJL -->
+	<td>
+			</td>
+	
+	<td>
+    	<a class="havlista" href="javascript:naytahavis('24501890')" title="Näytä havainnon tiedot">
+	Haapana	</a>    </td>
+    <!-- päivämäärä -->
+    <td> 
+    1.10.2021    </td>
+
+    <!-- KUNTA -->
+    <td>Kuusamo</td>
+
+    <!-- PAIKKA -->
+    <td>    <!-- LUKUMÄÄRÄ -->
+    <td>880</td>
+
+    <!-- LISÄTIEDOT -->
+    <td>
+     p     </td><td>Jyrki Mäkelä    </td>    </tr>        <tr class="tumma">    <td>    </td>
+	<!-- 20100427 AJL -->
+	<td>
+			</td>
+	<!-- 20111221 AJL -->
+	<td>
+			</td>
+	
+	<td>
+    	<a class="havlista" href="javascript:naytahavis('24495370')" title="Näytä havainnon tiedot">
+	Harmaasorsa	</a>    </td>
+    <!-- päivämäärä -->
+    <td> 
+    30.9.2021    </td>
+
+    <!-- KUNTA -->
+    <td>Raisio</td>
+
+    <!-- PAIKKA -->
+    <td>    <!-- LUKUMÄÄRÄ -->
+    <td>166</td>
+
+    <!-- LISÄTIEDOT -->
+    <td>
+     p     </td><td>Kai Norrdahl    </td>    </tr>	<tr class="vaalea">    <td>    </td>
+	<!-- 20100427 AJL -->
+	<td>
+			</td>
+	<!-- 20111221 AJL -->
+	<td>
+			</td>
+	
+	<td>
+    	<a class="havlista" href="javascript:naytahavis('24500853')" title="Näytä havainnon tiedot">
+	Tavi	</a>    </td>
+    <!-- päivämäärä -->
+    <td> 
+    1.10.2021    </td>
+
+    <!-- KUNTA -->
+    <td>Mynämäki</td>
+
+    <!-- PAIKKA -->
+    <td>    <!-- LUKUMÄÄRÄ -->
+    <td>580</td>
+
+    <!-- LISÄTIEDOT -->
+    <td>
+     p     </td><td>Hannu Kormano    </td>    </tr>        <tr class="tumma">    <td>    </td>
+	<!-- 20100427 AJL -->
+	<td>
+			</td>
+	<!-- 20111221 AJL -->
+	<td>
+			</td>
+	
+	<td>
+    	<a class="havlista" href="javascript:naytahavis('24501525')" title="Näytä havainnon tiedot">
+	Tavi	</a>    </td>
+    <!-- päivämäärä -->
+    <td> 
+    1.10.2021    </td>
+
+    <!-- KUNTA -->
+    <td>Mynämäki</td>
+
+    <!-- PAIKKA -->
+    <td>    <!-- LUKUMÄÄRÄ -->
+    <td>960</td>
+
+    <!-- LISÄTIEDOT -->
+    <td>
+     Merikotkien ajettua kaik...    </td><td>Outi Silén, Jukka Sill...    </td>    </tr>	<tr class="vaalea">    <td>    </td>
+	<!-- 20100427 AJL -->
+	<td>
+			</td>
+	<!-- 20111221 AJL -->
+	<td>
+			</td>
+	
+	<td>
+    	<a class="havlista" href="javascript:naytahavis('24497471')" title="Näytä havainnon tiedot">
+	Tukkasotka	</a>    </td>
+    <!-- päivämäärä -->
+    <td> 
+    30.9.2021    </td>
+
+    <!-- KUNTA -->
+    <td>Parainen</td>
+
+    <!-- PAIKKA -->
+    <td>    <!-- LUKUMÄÄRÄ -->
+    <td>1606</td>
+
+    <!-- LISÄTIEDOT -->
+    <td>
+    5 aamuvakio, 1 m, 1400 W-...    </td><td>Kim Kuntze, Ohto Oksan...    </td>    </tr>        <tr class="tumma">    <td>    </td>
+	<!-- 20100427 AJL -->
+	<td>
+			</td>
+	<!-- 20111221 AJL -->
+	<td>
+			</td>
+	
+	<td>
+    	<a class="havlista" href="javascript:naytahavis('24497848')" title="Näytä havainnon tiedot">
+	Tukkasotka	</a>    </td>
+    <!-- päivämäärä -->
+    <td> 
+    30.9.2021    </td>
+
+    <!-- KUNTA -->
+    <td>Luvia</td>
+
+    <!-- PAIKKA -->
+    <td>    <!-- LUKUMÄÄRÄ -->
+    <td>464</td>
+
+    <!-- LISÄTIEDOT -->
+    <td>
+    5 aamuvakio S, 459  p     </td><td>Petri Salo, Jani Vasta...    </td>    </tr></table>  <!-- havaintolistauksen table loppuu -->
+</div>
+<br/>&nbsp;&nbsp;<a href="?toiminto=21&amp;id=3613&amp;sivu=1" onmouseover="javascript: ohje('Seuraava','Siirry seuraavalle sivulle.')">Seuraava &raquo;</a></div> <!-- isokehys loppuu -->
+	
+<div class="copytext">
+<br/><small><small>Lataus kesti 0.2619 s</small></small>
+</div>
+	
+</div><div id="navi">	<script language="JavaScript" type="text/javascript" src="ajax/ajax_funktiot.js"></script>
+	<script type="text/javascript">
+		function kielenvalinta(kieli) {
+			KasitteleSessiot('ajax/talletasessioon.php','alkukieli='+kieli+'&amp;kieli='+kieli,TarkistaVirhe,false);
+			window.location = "index.php";
+		}	
+	</script>	
+	<div id="nav">
+		<h2>Navigointi</h2>
+		<a name="navi-a"></a> 
+		<div id="normal">
+			<ul>
+				<li><a href="index.php" id="etusivu">Etusivu</a></li>
+				<li class="otsikko"><b>Havaintoselain</b>
+					<ul>
+						<li><a href="index.php?toiminto=8" id="hakukriteerit">Anna hakukriteerit</a></li>	
+						<li><a href="index.php?toiminto=19" id="admin_haut">Valtakunnan haut</a></li>
+						<li class="noborder"><a href="index.php?toiminto=48" id="havaintosivut">Havaintosivut</a></li>	
+						<!--	
+						<li class="noborder"><a href="index.php?toiminto=32" id="admin_haut">Teemahaut</a></li> 
+						-->
+					</ul>
+				</li>
+				<li><a href="index.php?toiminto=10" id="havaintolomake">Ilmoita havainto</a></li>
+				<li class="otsikko"><b>Lajitietoa</b>
+					<ul>
+						<li><a href="index.php?toiminto=7" id="etsitaksoni">Etsi laji</a></li>
+						<!-- <li><a href="index.php?toiminto=3" id="lajinaytto">Selaa lajeja</a></li> -->
+						<li><a href="index.php?toiminto=63" id="rk_ark_lajit">ARK-RK -lajit</a></li>
+						<li class="noborder"><a target="_blank" href="/rapot/taksonit.html" id="taksonilinkki">Taksoninimikkeet</a></li> <!-- 20120207 AJL -->
+					</ul>
+				</li>
+				<li><a href="index.php?toiminto=5" id="salasana">Unohtunut salasana</a></li>
+				<li><a target="_blank" href="https://tiedostot.birdlife.fi/ohjeet/tiira_ohje_fi.pdf" id="ohjeet">Ohjeet</a></li>
+				<!-- 20091222 AJL <li><a target="_blank" href="Tiira-bruksanvisning.html" id="svenska">< ?=$menu['bruksanvisning']? ></a></li> -->
+				<li><a href="https://www.tiirafoorumi.info/keskustelu/phpBB3/index.php" target="_blank" id="foorumi">Foorumi</a></li>
+				<!-- 20131218 AJL 
+				<li><a href="https://www.birdlife.fi/tiira-blogi/" target="_blank" id="tiirablogi">Tiira-blogi</a></li>
+				20161101 AJL -->
+			</ul>
+		</div>
+		<div id="footer">
+			<p>
+				&copy; <a href="https://www.birdlife.fi" target="_blank">BirdLife Suomi ry</a>
+			</p>
+			<p>
+				Ongelmia sisäänkirjautumisessa? Lähetä postia:<br/>tiira(ät)birdlife.fi
+			</p>
+							<p>
+					<a href="javascript:kielenvalinta('se')" style="text-decoration:none">På svenska</a>
+				</p>
+						</div>
+	</div>	
+	</div></div></body>
+</html>
+
+
