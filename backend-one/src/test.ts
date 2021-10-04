@@ -62,6 +62,12 @@ async function scrape(html: string, verbose = false) {
   console.log(birds)
 }
 
+/*
+
+ node test get-html  > somefile.html
+ node test read-file somefile.html
+
+*/
 var args = process.argv.slice(2)
 if (args[0] == 'get-html') {
   printHtml()

@@ -19,7 +19,7 @@ export class BackendOneStack extends Stack {
     const handler = new lambda.Function(this, 'Lambda', {
       runtime: lambda.Runtime.NODEJS_12_X,
       handler: 'birdhandler.handler',
-      code: lambda.Code.fromAsset(path.resolve(__dirname, 'lambda')),
+      code: lambda.Code.fromAsset(path.resolve(__dirname, '../src')),
     })
 
     // An API Gateway to make the Lambda web-accessible

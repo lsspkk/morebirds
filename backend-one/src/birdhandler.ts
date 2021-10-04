@@ -31,6 +31,7 @@ async function getHtml() {
   const html = await axios.get('https://www.tiira.fi/index.php?toiminto=21&id=3613&sivu=0', {
     responseType: 'arraybuffer',
     reponseEncoding: 'binary',
+    timeout: 1000,
   })
   return html.data.toString('latin1')
 }
